@@ -157,7 +157,7 @@ class _GooglePlaceAutoCompleteTextFieldState
 
       /// Add the custom header to the options
       final options = Options(headers: widget.headers);
-      Response response = await _dio.get(url);
+      Response response = await _dio.get(url, options);
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
 
       Map map = response.data;
