@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:google_places_textfield/model/place_details.dart';
 import 'package:google_places_textfield/model/place_type.dart';
 import 'package:google_places_textfield/model/prediction.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 import 'package:rxdart/subjects.dart';
 import 'package:dio/dio.dart';
@@ -152,10 +153,16 @@ class _GooglePlaceAutoCompleteTextFieldState
       String proxyURL = "https://cors-anywhere.herokuapp.com/";
       String url = kIsWeb ? proxyURL + apiURL : apiURL;
 
+      final PackageInfo info = await PackageInfo.fromPlatform();
+      final String packageName = info.packageName;
+      final String signature = info.buildSignature;
+
       /// Add the custom header to the options
-      final options = kIsWeb
-          ? Options(headers: {"x-requested-with": "XMLHttpRequest"})
-          : null;
+      final options = Options(headers: {
+        'X-Android-Package': packageName,
+        'X-Android-Cert': signature,
+        'x-ios-bundle-identifier': packageName,
+      });
       Response response = await _dio.get(url);
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
 
