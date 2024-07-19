@@ -6,7 +6,6 @@ import 'package:flutter/services.dart';
 import 'package:google_places_textfield/model/place_details.dart';
 import 'package:google_places_textfield/model/place_type.dart';
 import 'package:google_places_textfield/model/prediction.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 
 import 'package:rxdart/subjects.dart';
 import 'package:dio/dio.dart';
@@ -36,27 +35,30 @@ class GooglePlaceAutoCompleteTextField extends StatefulWidget {
   FocusNode? focusNode;
   PlaceType? placeType;
   String? language;
+  Map<String, dynamic> headers;
 
-  GooglePlaceAutoCompleteTextField(
-      {required this.textEditingController,
-      required this.googleAPIKey,
-      this.debounceTime = 600,
-      this.inputDecoration = const InputDecoration(),
-      this.itemClick,
-      this.isLatLngRequired = true,
-      this.textStyle = const TextStyle(),
-      this.countries,
-      this.getPlaceDetailWithLatLng,
-      this.itemBuilder,
-      this.boxDecoration,
-      this.isCrossBtnShown = true,
-      this.seperatedBuilder,
-      this.showError = true,
-      this.containerHorizontalPadding,
-      this.containerVerticalPadding,
-      this.focusNode,
-      this.placeType,
-      this.language = 'en'});
+  GooglePlaceAutoCompleteTextField({
+    required this.textEditingController,
+    required this.googleAPIKey,
+    required this.headers,
+    this.debounceTime = 600,
+    this.inputDecoration = const InputDecoration(),
+    this.itemClick,
+    this.isLatLngRequired = true,
+    this.textStyle = const TextStyle(),
+    this.countries,
+    this.getPlaceDetailWithLatLng,
+    this.itemBuilder,
+    this.boxDecoration,
+    this.isCrossBtnShown = true,
+    this.seperatedBuilder,
+    this.showError = true,
+    this.containerHorizontalPadding,
+    this.containerVerticalPadding,
+    this.focusNode,
+    this.placeType,
+    this.language = 'en',
+  });
 
   @override
   _GooglePlaceAutoCompleteTextFieldState createState() =>
@@ -153,16 +155,8 @@ class _GooglePlaceAutoCompleteTextFieldState
       String proxyURL = "https://cors-anywhere.herokuapp.com/";
       String url = kIsWeb ? proxyURL + apiURL : apiURL;
 
-      final PackageInfo info = await PackageInfo.fromPlatform();
-      final String packageName = info.packageName;
-      final String signature = info.buildSignature;
-
       /// Add the custom header to the options
-      final options = Options(headers: {
-        'X-Android-Package': packageName,
-        'X-Android-Cert': signature,
-        'x-ios-bundle-identifier': packageName,
-      });
+      final options = Options(headers: widget.headers);
       Response response = await _dio.get(url);
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
 
