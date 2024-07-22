@@ -2,12 +2,10 @@ library google_places_textfield;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:google_places_textfield/model/place_details.dart';
 import 'package:google_places_textfield/model/place_type.dart';
 import 'package:google_places_textfield/model/prediction.dart';
 
-import 'package:rxdart/subjects.dart';
 import 'package:dio/dio.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -25,7 +23,7 @@ class GooglePlaceAutoCompleteTextField extends StatefulWidget {
   List<String>? countries = [];
   TextEditingController textEditingController = TextEditingController();
   ListItemBuilder? itemBuilder;
-  Widget? seperatedBuilder;
+  Widget? separatedBuilder;
   void clearData;
   BoxDecoration? boxDecoration;
   bool isCrossBtnShown;
@@ -38,6 +36,7 @@ class GooglePlaceAutoCompleteTextField extends StatefulWidget {
   Map<String, dynamic> headers;
 
   GooglePlaceAutoCompleteTextField({
+    super.key,
     required this.textEditingController,
     required this.googleAPIKey,
     required this.headers,
@@ -51,7 +50,7 @@ class GooglePlaceAutoCompleteTextField extends StatefulWidget {
     this.itemBuilder,
     this.boxDecoration,
     this.isCrossBtnShown = true,
-    this.seperatedBuilder,
+    this.separatedBuilder,
     this.showError = true,
     this.containerHorizontalPadding,
     this.containerVerticalPadding,
@@ -93,7 +92,7 @@ class _GooglePlaceAutoCompleteTextFieldState
             BoxDecoration(
                 shape: BoxShape.rectangle,
                 border: Border.all(color: Colors.grey, width: 0.6),
-                borderRadius: BorderRadius.all(Radius.circular(10))),
+                borderRadius: const BorderRadius.all(Radius.circular(10))),
         child: Row(
           mainAxisSize: MainAxisSize.max,
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -114,10 +113,11 @@ class _GooglePlaceAutoCompleteTextFieldState
               ),
             ),
             (!widget.isCrossBtnShown)
-                ? SizedBox()
+                ? const SizedBox()
                 : isCrossBtn && _showCrossIconWidget()
-                    ? IconButton(onPressed: clearData, icon: Icon(Icons.close))
-                    : SizedBox()
+                    ? IconButton(
+                        onPressed: clearData, icon: const Icon(Icons.close))
+                    : const SizedBox()
           ],
         ),
       ),
@@ -135,9 +135,9 @@ class _GooglePlaceAutoCompleteTextFieldState
         String country = widget.countries![i];
 
         if (i == 0) {
-          apiURL = apiURL + "&components=country:$country";
+          apiURL = "$apiURL&components=country:$country";
         } else {
-          apiURL = apiURL + "|" + "country:" + country;
+          apiURL = "$apiURL|country:$country";
         }
       }
     }
@@ -168,25 +168,25 @@ class _GooglePlaceAutoCompleteTextFieldState
       PlacesAutocompleteResponse subscriptionResponse =
           PlacesAutocompleteResponse.fromJson(response.data);
 
-      if (text.length == 0) {
+      if (text.isEmpty) {
         alPredictions.clear();
-        this._overlayEntry!.remove();
+        _overlayEntry!.remove();
         return;
       }
 
       isSearched = false;
       alPredictions.clear();
-      if (subscriptionResponse.predictions!.length > 0 &&
+      if (subscriptionResponse.predictions!.isNotEmpty &&
           (widget.textEditingController.text.toString().trim()).isNotEmpty) {
         alPredictions.addAll(subscriptionResponse.predictions!);
       }
 
-      this._overlayEntry = null;
-      this._overlayEntry = this._createOverlayEntry();
-      Overlay.of(context)!.insert(this._overlayEntry!);
+      _overlayEntry = null;
+      _overlayEntry = _createOverlayEntry();
+      Overlay.of(context).insert(_overlayEntry!);
     } catch (e) {
       var errorHandler = ErrorHandler.internal().handleError(e);
-      _showSnackBar("${errorHandler.message}");
+      // _showSnackBar("${errorHandler.message}");
     }
   }
 
@@ -205,7 +205,7 @@ class _GooglePlaceAutoCompleteTextFieldState
   }
 
   OverlayEntry? _createOverlayEntry() {
-    if (context != null && context.findRenderObject() != null) {
+    if (context.findRenderObject() != null) {
       RenderBox renderBox = context.findRenderObject() as RenderBox;
       var size = renderBox.size;
       var offset = renderBox.localToGlobal(Offset.zero);
@@ -216,7 +216,7 @@ class _GooglePlaceAutoCompleteTextFieldState
                 width: size.width,
                 child: CompositedTransformFollower(
                   showWhenUnlinked: false,
-                  link: this._layerLink,
+                  link: _layerLink,
                   offset: Offset(0.0, size.height + 5.0),
                   child: Material(
                       child: ListView.separated(
@@ -224,7 +224,7 @@ class _GooglePlaceAutoCompleteTextFieldState
                     shrinkWrap: true,
                     itemCount: alPredictions.length,
                     separatorBuilder: (context, pos) =>
-                        widget.seperatedBuilder ?? SizedBox(),
+                        widget.separatedBuilder ?? const SizedBox(),
                     itemBuilder: (BuildContext context, int index) {
                       return InkWell(
                         onTap: () {
@@ -242,7 +242,7 @@ class _GooglePlaceAutoCompleteTextFieldState
                             ? widget.itemBuilder!(
                                 context, index, alPredictions[index])
                             : Container(
-                                padding: EdgeInsets.all(10),
+                                padding: const EdgeInsets.all(10),
                                 child: Text(alPredictions[index].description!)),
                       );
                     },
@@ -250,15 +250,14 @@ class _GooglePlaceAutoCompleteTextFieldState
                 ),
               ));
     }
+    return null;
   }
 
   removeOverlay() {
     alPredictions.clear();
-    this._overlayEntry = this._createOverlayEntry();
-    if (context != null) {
-      Overlay.of(context).insert(this._overlayEntry!);
-      this._overlayEntry!.markNeedsBuild();
-    }
+    _overlayEntry = _createOverlayEntry();
+    Overlay.of(context).insert(_overlayEntry!);
+    _overlayEntry!.markNeedsBuild();
   }
 
   Future<Response?> getPlaceDetailsFromPlaceId(Prediction prediction) async {
@@ -279,8 +278,9 @@ class _GooglePlaceAutoCompleteTextFieldState
       widget.getPlaceDetailWithLatLng!(prediction);
     } catch (e) {
       var errorHandler = ErrorHandler.internal().handleError(e);
-      _showSnackBar("${errorHandler.message}");
+      // _showSnackBar("${errorHandler.message}");
     }
+    return null;
   }
 
   void clearData() {
@@ -294,9 +294,9 @@ class _GooglePlaceAutoCompleteTextFieldState
       isCrossBtn = false;
     });
 
-    if (this._overlayEntry != null) {
+    if (_overlayEntry != null) {
       try {
-        this._overlayEntry?.remove();
+        _overlayEntry?.remove();
       } catch (e) {}
     }
   }
@@ -308,7 +308,7 @@ class _GooglePlaceAutoCompleteTextFieldState
   _showSnackBar(String errorData) {
     if (widget.showError) {
       final snackBar = SnackBar(
-        content: Text("$errorData"),
+        content: Text(errorData),
       );
 
       // Find the ScaffoldMessenger in the widget tree
