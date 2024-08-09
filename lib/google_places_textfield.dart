@@ -222,6 +222,7 @@ class _GooglePlaceAutoCompleteTextFieldState
                       padding: EdgeInsets.zero,
                       shrinkWrap: true,
                       itemCount: alPredictions.length,
+                      physics: const AlwaysScrollableScrollPhysics(),
                       separatorBuilder: (context, pos) =>
                           widget.separatedBuilder ?? const SizedBox(),
                       itemBuilder: (BuildContext context, int index) {
@@ -242,8 +243,11 @@ class _GooglePlaceAutoCompleteTextFieldState
                                   context, index, alPredictions[index])
                               : Container(
                                   padding: const EdgeInsets.all(10),
-                                  child:
-                                      Text(alPredictions[index].description!)),
+                                  child: Text(
+                                    alPredictions[index].description!,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  )),
                         );
                       },
                     ),
