@@ -219,34 +219,36 @@ class _GooglePlaceAutoCompleteTextFieldState
                   link: _layerLink,
                   offset: Offset(0.0, size.height + 5.0),
                   child: Material(
-                      child: ListView.separated(
-                    padding: EdgeInsets.zero,
-                    shrinkWrap: true,
-                    itemCount: alPredictions.length,
-                    separatorBuilder: (context, pos) =>
-                        widget.separatedBuilder ?? const SizedBox(),
-                    itemBuilder: (BuildContext context, int index) {
-                      return InkWell(
-                        onTap: () {
-                          var selectedData = alPredictions[index];
-                          if (index < alPredictions.length) {
-                            widget.itemClick!(selectedData);
+                    child: ListView.separated(
+                      padding: EdgeInsets.zero,
+                      shrinkWrap: true,
+                      itemCount: alPredictions.length,
+                      separatorBuilder: (context, pos) =>
+                          widget.separatedBuilder ?? const SizedBox(),
+                      itemBuilder: (BuildContext context, int index) {
+                        return InkWell(
+                          onTap: () {
+                            var selectedData = alPredictions[index];
+                            if (index < alPredictions.length) {
+                              widget.itemClick!(selectedData);
 
-                            if (widget.isLatLngRequired) {
-                              getPlaceDetailsFromPlaceId(selectedData);
+                              if (widget.isLatLngRequired) {
+                                getPlaceDetailsFromPlaceId(selectedData);
+                              }
+                              removeOverlay();
                             }
-                            removeOverlay();
-                          }
-                        },
-                        child: widget.itemBuilder != null
-                            ? widget.itemBuilder!(
-                                context, index, alPredictions[index])
-                            : Container(
-                                padding: const EdgeInsets.all(10),
-                                child: Text(alPredictions[index].description!)),
-                      );
-                    },
-                  )),
+                          },
+                          child: widget.itemBuilder != null
+                              ? widget.itemBuilder!(
+                                  context, index, alPredictions[index])
+                              : Container(
+                                  padding: const EdgeInsets.all(10),
+                                  child:
+                                      Text(alPredictions[index].description!)),
+                        );
+                      },
+                    ),
+                  ),
                 ),
               ));
     }
@@ -261,14 +263,11 @@ class _GooglePlaceAutoCompleteTextFieldState
   }
 
   Future<Response?> getPlaceDetailsFromPlaceId(Prediction prediction) async {
-    //String key = GlobalConfiguration().getString('google_maps_key');
-
-    var url =
-        "https://maps.googleapis.com/maps/api/place/details/json?placeid=${prediction.placeId}&key=${widget.googleAPIKey}";
+    var url = "https://maps.googleapis.com/maps/api/place/details/json?"
+        "placeid=${prediction.placeId}&key=${widget.googleAPIKey}"
+        "&components=country:uk";
     try {
-      Response response = await _dio.get(
-        url,
-      );
+      Response response = await _dio.get(url);
 
       PlaceDetails placeDetails = PlaceDetails.fromJson(response.data);
 
@@ -305,17 +304,17 @@ class _GooglePlaceAutoCompleteTextFieldState
     return (widget.textEditingController.text.isNotEmpty);
   }
 
-  _showSnackBar(String errorData) {
-    if (widget.showError) {
-      final snackBar = SnackBar(
-        content: Text(errorData),
-      );
-
-      // Find the ScaffoldMessenger in the widget tree
-      // and use it to show a SnackBar.
-      ScaffoldMessenger.of(context).showSnackBar(snackBar);
-    }
-  }
+// _showSnackBar(String errorData) {
+//   if (widget.showError) {
+//     final snackBar = SnackBar(
+//       content: Text(errorData),
+//     );
+//
+//     // Find the ScaffoldMessenger in the widget tree
+//     // and use it to show a SnackBar.
+//     ScaffoldMessenger.of(context).showSnackBar(snackBar);
+//   }
+// }
 }
 
 PlacesAutocompleteResponse parseResponse(Map responseBody) {
