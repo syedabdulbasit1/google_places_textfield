@@ -222,7 +222,7 @@ class _GooglePlaceAutoCompleteTextFieldState
                       padding: EdgeInsets.zero,
                       shrinkWrap: true,
                       itemCount: alPredictions.length,
-                      physics: const AlwaysScrollableScrollPhysics(),
+                      physics: const ClampingScrollPhysics(),
                       separatorBuilder: (context, pos) =>
                           widget.separatedBuilder ?? const SizedBox(),
                       itemBuilder: (BuildContext context, int index) {
